@@ -20,11 +20,11 @@ lua_State * L;
 SDL_Surface * screen;
 
 int main(int argc, char * argv[]) {
+
 	screen = NULL;
 	
 	// Initialize SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_EnableUNICODE(1); //important
 	
 	// Initialize Lua
 	L = luaL_newstate();
@@ -33,6 +33,13 @@ int main(int argc, char * argv[]) {
 	
 	// Load the lua library
 	if (luaL_dofile(L,"climatecontroller.lua")) {
+		printf("Uh oh!\n");
+		lua_error(L);
+		exit(1);
+	}
+
+	// SDLK Mappings
+	if (luaL_dofile(L,"sdlk.lua")) {
 		printf("Uh oh!\n");
 		lua_error(L);
 		exit(1);
@@ -83,10 +90,11 @@ int main(int argc, char * argv[]) {
 		while( SDL_PollEvent( &event ) ){
 			switch( event.type ){
 				case SDL_KEYDOWN:
-					//lua_getglobal(L, "keypress");
-					//lua_pushnumber(L, event.key.keysym.unicode);
-					//if (lua_pcall(L, 1, 0, 0) != 0) 
-					//	luaL_error(L, "error calling keypress");
+					lua_getglobal(L, "keypress");
+					lua_pushnumber(L, event.key.keysym.sym);
+					lua_pushboolean(L, 0);
+					if (lua_pcall(L, 2, 0, 0) != 0) 
+						luaL_error(L, "error calling keypress");
 					switch ( event.key.keysym.sym ) {
 						case SDLK_ESCAPE:
 							killswitch = 1;
@@ -94,7 +102,15 @@ int main(int argc, char * argv[]) {
 						default:
 							break;
 					}
+					break;
 				case SDL_KEYUP:
+					lua_getglobal(L, "keypress");
+					lua_pushnumber(L, event.key.keysym.sym);
+					lua_pushboolean(L, 1);
+					if (lua_pcall(L, 2, 0, 0) != 0) 
+						luaL_error(L, "error calling keypress");
+					break;
+				default:
 					break;
 			}
 		}
