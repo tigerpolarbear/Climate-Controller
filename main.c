@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
@@ -30,20 +31,54 @@ int main(int argc, char * argv[]) {
 	luaL_openlibs(L);
 	luaL_register (L, "cc", cc);
 	
-	screen = SDL_SetVideoMode(640, 480, 16, SDL_FULLSCREEN);
-	//screen = SDL_SetVideoMode(x, y, 16, 0);
-	
-	// Load the actual game
-	if (luaL_dofile(L,"lulululu.lua")) {
+	// Load the lua library
+	if (luaL_dofile(L,"climatecontroller.lua")) {
 		printf("Uh oh!\n");
 		lua_error(L);
-		exit(252);
+		exit(1);
+	}
+
+	// Try to load the actual game
+	if (argc != 2) {
+		printf("provide one argument, the game to play\n");
+		exit(1);
+	}
+	if (chdir(argv[1])) {
+		printf("%s doesn't exist!\n",argv[1]);
+		exit(1);
 	}
 	
+	if (luaL_dofile(L,"index.lua")) {
+		printf("Uh oh!\n");
+		lua_error(L);
+		exit(1);
+	}
+	
+	screen = SDL_SetVideoMode(640, 480, 16, 0);
+
 	// Main loop
 	SDL_Event event;
 	uint8_t killswitch = 0;
-	// it's a joke! get it? it kills these switch statements!
+	Uint32 lastflip = SDL_GetTicks();
+	Uint32 lastmainloop= SDL_GetTicks();
+	uint8_t fps = 0;
+	Uint32 now = SDL_GetTicks();
+	Uint32 delta = 0; //used for both lastflip and lastmainloop
+
+	lua_getglobal(L, "desiredfps");
+	if (!lua_isnumber(L, -1)) {
+		printf("Whoa. desiredfps wasn't a number.\n");
+		exit(1);
+	}
+	fps = lua_tonumber(L,-1);
+	if (!fps) lua_error(L);
+	printf("FPS: %i\n", fps);
+
+	lua_getglobal(L, "initialize");
+	if (lua_pcall(L, 0, 1, 0) != 0)
+		lua_error(L);
+
+
 	while (!killswitch) {
 		while( SDL_PollEvent( &event ) ){
 			switch( event.type ){
@@ -64,9 +99,18 @@ int main(int argc, char * argv[]) {
 			}
 		}
 		// This is called every frame
-		//lua_getglobal(L, "mainloop");
-		//if (lua_pcall(L, 0, 1, 0) != 0)
-		//	luaL_error(L, "error running function: 'mainloop': ");
+		now = SDL_GetTicks();
+		delta = now - lastmainloop;
+		lua_getglobal(L, "mainloop");
+		lua_pushnumber(L,delta);
+		lastmainloop = now;
+		if (lua_pcall(L, 1, 1, 0) != 0)
+			lua_error(L);
+		now = SDL_GetTicks();
+		delta = now - lastflip;
+		if (delta < (1000/fps))
+			SDL_Delay((1000/fps) - delta);
+		lastflip = now;
 		SDL_Flip(screen);
 	}
 	exit(0);
