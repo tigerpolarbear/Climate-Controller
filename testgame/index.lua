@@ -5,19 +5,9 @@ desiredfps = 40
 
 -- the game must define an "initialize" function to be called before the game begins
 function initialize()
-	z = cc.frame_new(1,2,3,4);
-	print(cc.frame_getx(z))
-	cc.frame_setx(z, 3)
-	print(cc.frame_getx(z))
-	print(cc.frame_gety(z))
-	cc.frame_sety(z, 3)
-	print(cc.frame_gety(z))
-	print(cc.frame_getw(z))
-	cc.frame_setw(z, 4)
-	print(cc.frame_getw(z))
-	print(cc.frame_geth(z))
-	cc.frame_seth(z, 3)
-	print(cc.frame_geth(z))
+	z = cc.frame_new(0,0,32,32)
+	i = cc.image_new("data/woop.png")
+	cc.blit(i, z, z);
 	return
 end
 

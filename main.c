@@ -21,6 +21,11 @@ static int ccframe_getx(lua_State *L);
 static int ccframe_gety(lua_State *L);
 static int ccframe_getw(lua_State *L);
 static int ccframe_geth(lua_State *L);
+
+static int ccimage_new(lua_State * L);
+
+static int ccblit(lua_State * L);
+
 static const struct luaL_reg cc [] = {
 	{"frame_new", ccframe_new},
 	{"frame_setx", ccframe_setx},
@@ -31,6 +36,11 @@ static const struct luaL_reg cc [] = {
 	{"frame_gety", ccframe_gety},
 	{"frame_getw", ccframe_getw},
 	{"frame_geth", ccframe_geth},
+
+	{"image_new", ccimage_new},
+
+	{"blit", ccblit},
+
 	{NULL, NULL} // form {"<fname>", fpointer}
 };
 
@@ -80,8 +90,9 @@ int main(int argc, char * argv[]) {
 		exit(1);
 	}
 	
+	// Get a display! Throw it at the lua environment!
 	screen = SDL_SetVideoMode(640, 480, 16, 0);
-
+	
 	// Main loop
 	SDL_Event event;
 	uint8_t killswitch = 0;
@@ -103,7 +114,6 @@ int main(int argc, char * argv[]) {
 	lua_getglobal(L, "initialize");
 	if (lua_pcall(L, 0, 1, 0) != 0)
 		lua_error(L);
-
 
 	while (!killswitch) {
 		while( SDL_PollEvent( &event ) ){
@@ -208,5 +218,29 @@ static int ccframe_geth(lua_State *L) {
 	SDL_Rect * r = lua_touserdata(L, 1);
 	lua_pushnumber(L, r->h);
 	return 1;
+}
+
+static int ccimage_new(lua_State * L) {
+	SDL_Surface ** r = lua_newuserdata(L, sizeof(SDL_Surface *));
+	SDL_Surface * s = IMG_Load(lua_tostring (L, 1));
+	if (!s) {
+		printf("Tried to load an image and it didn't work!!!!\n");
+		exit(1);
+	}
+	*r = s;
+	printf("loaded image: %p\n", *r); 
+	return 1;
+}
+
+static int ccblit(lua_State * L) {
+	SDL_Surface ** src = lua_touserdata(L, 1);
+	SDL_Rect * srcr = lua_touserdata(L, 2);
+	//SDL_Surface ** dst = lua_touserdata(L, 3);
+	SDL_Surface * dst = SDL_GetVideoSurface(); 
+	SDL_Rect * dstr = lua_touserdata(L, 3);
+	printf("src: %p\n", *src, srcr, dst, dstr);
+	SDL_BlitSurface(*src, srcr, dst, dstr);
+	printf("blitted?\n");
+	return 0;
 }
 
