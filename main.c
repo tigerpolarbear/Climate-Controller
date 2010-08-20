@@ -11,7 +11,26 @@
 #include <lauxlib.h>
 
 // Functions for the Lua environment
+// static int functionname (lua_State *L);
+static int ccframe_new(lua_State *L);
+static int ccframe_setx(lua_State *L);
+static int ccframe_sety(lua_State *L);
+static int ccframe_setw(lua_State *L);
+static int ccframe_seth(lua_State *L);
+static int ccframe_getx(lua_State *L);
+static int ccframe_gety(lua_State *L);
+static int ccframe_getw(lua_State *L);
+static int ccframe_geth(lua_State *L);
 static const struct luaL_reg cc [] = {
+	{"frame_new", ccframe_new},
+	{"frame_setx", ccframe_setx},
+	{"frame_sety", ccframe_sety},
+	{"frame_setw", ccframe_setw},
+	{"frame_seth", ccframe_seth},
+	{"frame_getx", ccframe_getx},
+	{"frame_gety", ccframe_gety},
+	{"frame_getw", ccframe_getw},
+	{"frame_geth", ccframe_geth},
 	{NULL, NULL} // form {"<fname>", fpointer}
 };
 
@@ -128,5 +147,66 @@ int main(int argc, char * argv[]) {
 		SDL_Flip(screen);
 	}
 	exit(0);
+}
+
+static int ccframe_new(lua_State *L) {
+	SDL_Rect * r = lua_newuserdata (L, sizeof(SDL_Rect));
+	r->x = lua_tonumber(L, 1);
+	r->y = lua_tonumber(L, 2);
+	r->w = lua_tonumber(L, 3);
+	r->h = lua_tonumber(L, 4);
+	return 1;
+}
+
+static int ccframe_setx(lua_State *L) {
+	SDL_Rect * r = lua_touserdata(L, 1);
+	int x = lua_tonumber(L, 2);
+	r->x = x;
+	return 0;
+}
+
+static int ccframe_sety(lua_State *L) {
+	SDL_Rect * r = lua_touserdata(L, 1);
+	int y = lua_tonumber(L, 2);
+	r->y = y;
+	return 0;
+}
+
+static int ccframe_setw(lua_State *L) {
+	SDL_Rect * r = lua_touserdata(L, 1);
+	int w = lua_tonumber(L, 2);
+	r->w = w;
+	return 0;
+}
+
+static int ccframe_seth(lua_State *L) {
+	SDL_Rect * r = lua_touserdata(L, 1);
+	int h = lua_tonumber(L, 2);
+	r->h = h;
+	return 0;
+}
+
+static int ccframe_getx(lua_State *L) {
+	SDL_Rect * r = lua_touserdata(L, 1);
+	lua_pushnumber(L, r->x);
+	return 1;
+}
+
+static int ccframe_gety(lua_State *L) {
+	SDL_Rect * r = lua_touserdata(L, 1);
+	lua_pushnumber(L, r->y);
+	return 1;
+}
+
+static int ccframe_getw(lua_State *L) {
+	SDL_Rect * r = lua_touserdata(L, 1);
+	lua_pushnumber(L, r->w);
+	return 1;
+}
+
+static int ccframe_geth(lua_State *L) {
+	SDL_Rect * r = lua_touserdata(L, 1);
+	lua_pushnumber(L, r->h);
+	return 1;
 }
 
