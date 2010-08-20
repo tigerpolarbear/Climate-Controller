@@ -8,17 +8,12 @@ function initialize()
 	return
 end
 
--- the game must define an "keypress" function
--- it gets called every time a key is pressed
--- k: unicode key
--- r: was it a key release
-function keypress(k, r)
-	print("KEEE:", k, r)
-	return
-end
-
 -- the game must define a "mainloop" function to be called every frame
 function mainloop(delta)
-	-- updates yr states n stuff
+	event = keyevent()
+	while event ~= nil do
+		-- process each key stroke/release
+		event = keyevent()
+	end
 	return
 end

@@ -90,11 +90,10 @@ int main(int argc, char * argv[]) {
 		while( SDL_PollEvent( &event ) ){
 			switch( event.type ){
 				case SDL_KEYDOWN:
-					lua_getglobal(L, "keypress");
+					lua_getglobal(L, "keystroke");
 					lua_pushnumber(L, event.key.keysym.sym);
-					lua_pushboolean(L, 0);
-					if (lua_pcall(L, 2, 0, 0) != 0) 
-						luaL_error(L, "error calling keypress");
+					if (lua_pcall(L, 1, 0, 0) != 0) 
+						luaL_error(L, "error calling keystroke");
 					switch ( event.key.keysym.sym ) {
 						case SDLK_ESCAPE:
 							killswitch = 1;
@@ -104,11 +103,10 @@ int main(int argc, char * argv[]) {
 					}
 					break;
 				case SDL_KEYUP:
-					lua_getglobal(L, "keypress");
+					lua_getglobal(L, "keyrelease");
 					lua_pushnumber(L, event.key.keysym.sym);
-					lua_pushboolean(L, 1);
-					if (lua_pcall(L, 2, 0, 0) != 0) 
-						luaL_error(L, "error calling keypress");
+					if (lua_pcall(L, 1, 0, 0) != 0) 
+						luaL_error(L, "error calling keyrelease");
 					break;
 				default:
 					break;

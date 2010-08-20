@@ -134,3 +134,4 @@ sdlk[318] = "SDLK_BREAK"
 sdlk[319] = "SDLK_MENU"
 sdlk[320] = "SDLK_POWER"
 sdlk[321] = "SDLK_EURO"
+
